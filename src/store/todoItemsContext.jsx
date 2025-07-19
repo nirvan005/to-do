@@ -1,9 +1,13 @@
-import { createContext, useReducer } from "react";
+import { createContext, useEffect, useReducer } from "react";
 export const todoContext = createContext({
   tasks: [],
   onAdd: () => {},
   onDelete: () => {},
 });
+function getInitialTasks() {
+  const stored = localStorage.getItem("tasks");
+  return stored ? JSON.parse(stored) : [];
+}
 function ContextProvider({ children }) {
   const reducerFunction = (initialState, action) => {
     let newTasks = initialState;
@@ -16,6 +20,10 @@ function ContextProvider({ children }) {
     }
     return newTasks;
   };
+  let [tasks, dispatchTasks] = useReducer(reducerFunction, getInitialTasks());
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
   const onDelete = (task) => {
     let newAction = {
       type: "DELETE",
@@ -36,20 +44,7 @@ function ContextProvider({ children }) {
     };
     dispatchTasks(newAction);
   };
-  let [tasks, dispatchTasks] = useReducer(reducerFunction, [
-    {
-      name: "Buy Milk",
-      date: "2024-10-10",
-    },
-    {
-      name: "Go to College",
-      date: "2024-10-14",
-    },
-    {
-      name: "Eat",
-      date: "2024-10-10",
-    },
-  ]);
+
   return (
     <>
       <todoContext.Provider
@@ -65,33 +60,3 @@ function ContextProvider({ children }) {
   );
 }
 export default ContextProvider;
-
-//useState Method
-/*let [tasks,setTasks]=useState([
-    {
-    name: "Buy Milk",
-    date: "2024-10-10",
-    },
-    {
-      name: "Go to College",
-      date: "2024-10-14",
-    },
-    {
-      name: "Eat",
-      date: "2024-10-10",
-    }
-    ]);
-    const onDelete=(task)=>{
-          let newTasks=tasks.filter((item)=>item.name!==task.name);
-          setTasks(newTasks);
-    };
-    const onAdd=(name,date)=>{
-      let item={
-        name:name,
-        date:date,
-      };
-      setTasks((newTask)=>{
-        let newTasks=[...newTask,item];
-        return newTasks;
-      });
-    };*/
